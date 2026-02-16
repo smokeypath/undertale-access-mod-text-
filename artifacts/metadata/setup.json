@@ -1,0 +1,10 @@
+﻿{
+  "gamePath": "D:\\steam\\steamapps\\common\\Undertale",
+  "repoRoot": "D:\\Accessibility-mod-template-1.0.1\\Accessibility-Mod-Template",
+  "initializedAt": "2026-02-14 14:00:39",
+  "dataWinSha256": "B718F8223A5BB31979FFEED10BE6140C857B882FC0D0462B89D6287AE38C81C7",
+  "artifacts": {
+    "originalDataWin": "D:\\Accessibility-mod-template-1.0.1\\Accessibility-Mod-Template\\artifacts\\original\\data.win",
+    "workingDataWin": "D:\\Accessibility-mod-template-1.0.1\\Accessibility-Mod-Template\\artifacts\\working\\data.win"
+  }
+}

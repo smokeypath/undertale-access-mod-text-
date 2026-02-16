@@ -1,0 +1,11 @@
+if (active == 1)
+{
+    for (i = 0; i < num; i += 1)
+    {
+        if (instance_exists(child[i]))
+        {
+            with (child[i])
+                instance_destroy();
+        }
+    }
+}

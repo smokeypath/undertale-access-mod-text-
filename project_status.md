@@ -1,0 +1,91 @@
+# Project Status
+
+- Game name: Undertale
+- Mod name: UndertaleAccess
+- Game path: D:\steam\steamapps\common\Undertale
+- Experience level: A Lot
+- Engine: GameMaker Studio
+- Architecture: x86 (UNDERTALE.exe PE machine)
+- MelonLoader: Not applicable (Unity-only)
+- MelonLoader log: Not applicable
+- .NET SDK: Installed (`8.0.418`, `10.0.103`)
+- Decompiler: Not installed yet (GameMaker tools needed)
+- Multilingual support: Yes (required)
+
+## Notes
+
+- Undertale uses GameMaker Studio, so Unity + MelonLoader workflow is not used.
+- Next phase should focus on GameMaker asset/script extraction and runtime hook strategy.
+- Step 1 scan results:
+  - Core container: `data.win` (62,921,978 bytes)
+  - Executable: `UNDERTALE.exe` (x86)
+  - Text/config candidates: `credits.txt`, `options.ini`
+- Step 2 toolchain bootstrap:
+  - Workspace initialized: `artifacts/original`, `artifacts/working`, `artifacts/metadata`, `patches`
+  - Baseline `data.win` hash: `B718F8223A5BB31979FFEED10BE6140C857B882FC0D0462B89D6287AE38C81C7`
+  - UndertaleModTool: `D:\UndertaleModTool_v0.8.4.1-Windows\UndertaleModTool.exe`
+  - xdelta3 (optional): not found yet
+- Step 3 analysis (initial) completed:
+  - Localization core confirmed: `scr_gettext`, `textdata_en`, `textdata_ja`, `global.language`
+  - Input core confirmed: `control_update` (`Z/Enter`, `X/Shift`, `C/Ctrl`) + arrow keys in `obj_time`
+  - Menu/dialog hook candidates confirmed: `obj_overworldcontroller`, `obj_dialoguer`
+- Step 4 implementation prepared:
+  - UTMT patch script: `scripts/utmt/Apply-Step4-AccessibilityHooks.csx`
+  - Relay script: `scripts/Start-GameMakerAnnouncementRelay.ps1`
+  - Runbook: `docs/step4-dialog-menu-hooks.md`
+- Step 4 milestone (saved):
+  - Working file hash (current): `B33ED3F20C9F0D9774A97D6CE58F0FC6475A7E629C761F8FCAC29E6C14810C16`
+  - Hook signature check: `accessibility_announce.txt` found in `artifacts/working/data.win`
+  - Deployment: copied to `D:\steam\steamapps\common\Undertale\data.win` on 2026-02-14
+  - Relay startup check: passed (`Start-GameMakerAnnouncementRelay.ps1`, Engine=`SpVoice`)
+  - Status: gameplay verification pending
+- Step 5 milestone (2026-02-15):
+  - Relay path handling improved: game dir + `%LOCALAPPDATA%\UNDERTALE` both watched
+  - Relay engine fallback logging added (Tolk/SystemSpeech/SpVoice init diagnostics)
+  - UTMT hook script fixed: `ossafe_file_text_write_string(...)` + `ossafe_file_text_writeln(...)`
+  - Title announcement verified: `[ANNOUNCE] Title: [PRESS Z OR ENTER]`
+  - Naming screen announcements verified:
+    - `Name: A/H/O...`
+    - `Name: Quit/Backspace/Done`
+    - `Title Menu: Begin Game`
+  - Current deployed game hash: `5C5285F2FA481FB4AD76471F45C793FAA5B13228AB184D60567B009B12ED3208`
+  - Note: `artifacts/working/data.win` currently differs (`B718F8223A5BB31979FFEED10BE6140C857B882FC0D0462B89D6287AE38C81C7`); sync it before future patching.
+- Step 6 milestone (2026-02-16):
+  - UTMT hook script extended for battle accessibility:
+    - Battle menu announcements added (`FIGHT/ACT/ITEM/MERCY`)
+    - Target announcements added (`Target` / `ACT Target`)
+    - ACT choice announcements added (`global.choice[...]`)
+    - Item/Mercy submenu announcements added
+  - Status announcements added:
+    - Battle/field status includes HP/LV context where applicable
+    - Battle status line added (`Status: HP x/y, LV z`) on HP/LV change
+  - In-game write throttling added in GML globals:
+    - `global.acc_last_announce_time`
+    - `global.acc_min_interval`
+  - Relay de-dup/throttle improvements added in `Start-GameMakerAnnouncementRelay.ps1`:
+    - New params: `-MinSpeakIntervalMs` (default `120`), `-DedupWindowMs` (default `1500`)
+    - Whitespace-normalized text dedup and recent-window suppression
+  - User verification:
+    - `SystemSpeech` (SAPI5) confirmed working with live `[ANNOUNCE]` output
+    - Tolk warning observed in Auto mode:
+      - `HRESULT:0x8007000B` (likely x86/x64 mismatch), then fallback to `SystemSpeech`
+    - Preferred runtime command now:
+      - `powershell -ExecutionPolicy Bypass -File "D:\Accessibility-mod-template-1.0.1\Accessibility-Mod-Template\scripts\Start-GameMakerAnnouncementRelay.ps1" -GamePath "D:\steam\steamapps\common\Undertale" -Engine SystemSpeech`
+- Next session quick start:
+  - Start relay:
+    - `powershell -ExecutionPolicy Bypass -File "D:\Accessibility-mod-template-1.0.1\Accessibility-Mod-Template\scripts\Start-GameMakerAnnouncementRelay.ps1" -GamePath "D:\steam\steamapps\common\Undertale" -Engine SpVoice`
+  - Clean old announce files:
+    - `Remove-Item "D:\steam\steamapps\common\Undertale\accessibility_announce.txt" -ErrorAction SilentlyContinue`
+    - `Remove-Item "$env:LOCALAPPDATA\UNDERTALE\accessibility_announce.txt" -ErrorAction SilentlyContinue`
+  - Smoke checks:
+    - Title should announce once (`Title: ...`)
+    - Naming cursor should announce (`Name: ...`)
+    - In-game menu should announce (`Menu: ...`)
+- Next actions:
+  - Sync `artifacts/working/data.win` with deployed patched build before next UTMT run
+  - Validate battle announcements across different encounters/boss scripts
+  - Tune announcement frequency and phrasing based on gameplay feedback
+  - Add optional localized (Chinese) relay phrasing layer (deferred by user)
+  - Decide Tolk/NVDA path:
+    - keep `SystemSpeech` only, or
+    - provide matching-architecture `Tolk.dll` + `nvdaControllerClient*.dll`

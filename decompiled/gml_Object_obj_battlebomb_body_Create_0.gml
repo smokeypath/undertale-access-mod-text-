@@ -1,0 +1,22 @@
+sha = 0;
+image_xscale = 2;
+image_yscale = 2;
+type = 0;
+siner = 0;
+blenda = 16777215;
+blendb = 32768;
+coolwidth = 30;
+got = 0;
+myspeed = 10;
+
+with (obj_battlebg)
+    instance_destroy();
+
+defuse = 0;
+image_speed = 0.1;
+movetimer = 0;
+cc = 0;
+dd = 0;
+flash = 0;
+flasher = 0;
+shudder = 0;
